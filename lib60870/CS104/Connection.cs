@@ -404,6 +404,7 @@ namespace lib60870.CS104
             {
                 sentMessageHandler(sentMessageHandlerParameter, msg, 6);
             }
+            SendSFrame?.Invoke(this, "Send S");
         }
 
         private bool CheckSequenceNumber(int seqNo)
@@ -555,7 +556,7 @@ namespace lib60870.CS104
                 {
                     sentMessageHandler(sentMessageHandlerParameter, buffer, msgSize);
                 }
-
+                SendIFrame?.Invoke(this, "Send I");
                 return sendSequenceNumber;
             }
             else
@@ -964,7 +965,7 @@ namespace lib60870.CS104
 
                 if (sentMessageHandler != null)
                 {
-                    sentMessageHandler(sentMessageHandlerParameter, STARTDT_ACT_MSG, 6);
+                    sentMessageHandler(sentMessageHandlerParameter, STARTDT_ACT_MSG, STARTDT_ACT_MSG.Length);
                 }
             }
             else
@@ -974,6 +975,7 @@ namespace lib60870.CS104
                 else
                     throw new ConnectionException("not connected", new SocketException(10057));
             }
+            SendUFrame?.Invoke(this, "Send U StartDT");
         }
 
         /// <summary>
@@ -995,7 +997,7 @@ namespace lib60870.CS104
                 statistics.SentMsgCounter++;
                 if (sentMessageHandler != null)
                 {
-                    sentMessageHandler(sentMessageHandlerParameter, STOPDT_ACT_MSG, 6);
+                    sentMessageHandler(sentMessageHandlerParameter, STOPDT_ACT_MSG, STOPDT_ACT_MSG.Length);
                 }
             }
             else
@@ -1005,6 +1007,7 @@ namespace lib60870.CS104
                 else
                     throw new ConnectionException("not connected", new SocketException(10057));
             }
+            SendUFrame?.Invoke(this, "Send U StopDT");
         }
 
 
@@ -1024,7 +1027,7 @@ namespace lib60870.CS104
                 statistics.SentMsgCounter++;
                 if (sentMessageHandler != null)
                 {
-                    sentMessageHandler(sentMessageHandlerParameter, STARTDT_CON_MSG, 6);
+                    sentMessageHandler(sentMessageHandlerParameter, STARTDT_CON_MSG, STARTDT_CON_MSG.Length);
                 }
             }
             else
@@ -1034,6 +1037,8 @@ namespace lib60870.CS104
                 else
                     throw new ConnectionException("not connected", new SocketException(10057));
             }
+
+            SendUFrame?.Invoke(this, "Send U StartDT_CON");
         }
 
         protected void SendStopDT_CON()
@@ -1052,7 +1057,7 @@ namespace lib60870.CS104
                 statistics.SentMsgCounter++;
                 if (sentMessageHandler != null)
                 {
-                    sentMessageHandler(sentMessageHandlerParameter, STOPDT_CON_MSG, 6);
+                    sentMessageHandler(sentMessageHandlerParameter, STOPDT_CON_MSG, STOPDT_CON_MSG.Length);
                 }
             }
             else
@@ -1062,6 +1067,7 @@ namespace lib60870.CS104
                 else
                     throw new ConnectionException("not connected", new SocketException(10057));
             }
+            SendUFrame?.Invoke(this, "Send U StopDT_CON");
         }
 
         protected void SendTestFR_ACT()
@@ -1080,7 +1086,7 @@ namespace lib60870.CS104
                 statistics.SentMsgCounter++;
                 if (sentMessageHandler != null)
                 {
-                    sentMessageHandler(sentMessageHandlerParameter, TESTFR_ACT_MSG, 6);
+                    sentMessageHandler(sentMessageHandlerParameter, TESTFR_ACT_MSG, TESTFR_ACT_MSG.Length);
                 }
             }
             else
@@ -1090,6 +1096,8 @@ namespace lib60870.CS104
                 else
                     throw new ConnectionException("not connected", new SocketException(10057));
             }
+
+            SendUFrame?.Invoke(this, "Send U TestFR_ACT");
         }
 
         protected void SendTestFR_CON()
@@ -1108,7 +1116,7 @@ namespace lib60870.CS104
                 statistics.SentMsgCounter++;
                 if (sentMessageHandler != null)
                 {
-                    sentMessageHandler(sentMessageHandlerParameter, TESTFR_CON_MSG, 6);
+                    sentMessageHandler(sentMessageHandlerParameter, TESTFR_CON_MSG, TESTFR_CON_MSG.Length);
                 }
             }
             else
@@ -1118,6 +1126,7 @@ namespace lib60870.CS104
                 else
                     throw new ConnectionException("not connected", new SocketException(10057));
             }
+            SendUFrame?.Invoke(this, "Send U TestFR_CON");
         }
 
         /// <summary>
@@ -1279,6 +1288,7 @@ namespace lib60870.CS104
                     DebugLog("ASDU parsing failed: " + e.Message);
                     return false;
                 }
+                ReciveIFrame?.Invoke(this, "Received I frame: N(S) = " + frameSendSequenceNumber + " N(R) = " + frameRecvSequenceNumber);
 
             }
             else if ((buffer[2] & 0x03) == 0x01)
@@ -1289,6 +1299,7 @@ namespace lib60870.CS104
 
                 if (CheckSequenceNumber(seqNo) == false)
                     return false;
+                ReciveSFrame?.Invoke(this, "Recv S(" + seqNo + ") (own sendcounter = " + sendSequenceNumber + ")");
             }
             else if ((buffer[2] & 0x03) == 0x03)
             { /* U format frame */
@@ -1306,8 +1317,9 @@ namespace lib60870.CS104
                     statistics.SentMsgCounter++;
                     if (sentMessageHandler != null)
                     {
-                        sentMessageHandler(sentMessageHandlerParameter, TESTFR_CON_MSG, 6);
+                        sentMessageHandler(sentMessageHandlerParameter, TESTFR_CON_MSG, TESTFR_CON_MSG.Length);
                     }
+                    SendUFrame?.Invoke(this, "Send U TestFR_ACT");
 
                 }
                 else if (buffer[2] == 0x83)
@@ -1325,8 +1337,9 @@ namespace lib60870.CS104
                     statistics.SentMsgCounter++;
                     if (sentMessageHandler != null)
                     {
-                        sentMessageHandler(sentMessageHandlerParameter, STARTDT_CON_MSG, 6);
+                        sentMessageHandler(sentMessageHandlerParameter, STARTDT_CON_MSG, STARTDT_CON_MSG.Length);
                     }
+                    SendUFrame?.Invoke(this, "Send U STARTDT_CON_MSG");
                 }
                 else if (buffer[2] == 0x0b)
                 { /* STARTDT_CON */
@@ -1343,6 +1356,7 @@ namespace lib60870.CS104
                     if (connectionHandler != null)
                         connectionHandler(connectionHandlerParameter, ConnectionEvent.STOPDT_CON_RECEIVED);
                 }
+                ReciveUFrame?.Invoke(this, "Recv U");
 
             }
             else
@@ -1456,12 +1470,13 @@ namespace lib60870.CS104
                     ResetT3Timeout();
                     if (sentMessageHandler != null)
                     {
-                        sentMessageHandler(sentMessageHandlerParameter, TESTFR_ACT_MSG, 6);
+                        sentMessageHandler(sentMessageHandlerParameter, TESTFR_ACT_MSG, TESTFR_ACT_MSG.Length);
                     }
+                    SendUFrame?.Invoke(this, "Send U TestFR_ACT");
                 }
             }
 
-            if (unconfirmedReceivedIMessages > 0)
+            if (unconfirmedReceivedIMessages > apciParameters.W)
             {
                 if (checkConfirmTimeout((long)currentTime))
                 {
@@ -1653,6 +1668,8 @@ namespace lib60870.CS104
                         if (connectionHandler != null)
                             connectionHandler(connectionHandlerParameter, ConnectionEvent.OPENED);
 
+                        SendUFrame?.Invoke(this, "Send U StartDT TLS");
+
                     }
                     catch (SocketException se)
                     {
@@ -1820,6 +1837,7 @@ namespace lib60870.CS104
         {
             if (running)
             {
+                SendStopDT();
                 running = false;
                 workerThread.Join();
             }
@@ -1909,6 +1927,14 @@ namespace lib60870.CS104
 
             SendASDU(getDirectoryAsdu);
         }
+        //Sabsem
+        public delegate void PacketHandler(object sender, string s);
+        public event PacketHandler ReciveIFrame;
+        public event PacketHandler SendIFrame;
+        public event PacketHandler ReciveSFrame;
+        public event PacketHandler SendSFrame;
+        public event PacketHandler ReciveUFrame;
+        public event PacketHandler SendUFrame;
     }
 }
 
