@@ -109,6 +109,12 @@ namespace lib60870.CS101
 
                 if (workerThread != null)
                     workerThread.Join();
+
+                if (port != null)
+                {
+                    if (port.IsOpen == true)
+                        port.Close();
+                }
             }
         }
 
