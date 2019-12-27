@@ -74,6 +74,14 @@ namespace lib60870.CS101
         /// </summary>
         public void Run()
         {
+            if (port != null)
+            {
+                if (port.IsOpen == false)
+                    port.Open();
+
+                port.DiscardInBuffer();
+            }
+
             linkLayer.Run();
 
             if (fileClient != null)
@@ -190,7 +198,7 @@ namespace lib60870.CS101
                 this.appLayerParameters = alParams;
 
 
-            this.transceiver = new SerialTransceiverFT12(port, linkLayerParameters, DebugLog);
+            this.transceiver = new SerialTransceiverFT12(ref port, linkLayerParameters, DebugLog);
 
             linkLayer = new LinkLayer(buffer, linkLayerParameters, transceiver, DebugLog);
             linkLayer.LinkLayerMode = mode;
@@ -230,7 +238,7 @@ namespace lib60870.CS101
                 this.appLayerParameters = alParams;
 
 
-            this.transceiver = new SerialTransceiverFT12(serialStream, linkLayerParameters, DebugLog);
+            this.transceiver = new SerialTransceiverFT12(ref serialStream, linkLayerParameters, DebugLog);
 
             linkLayer = new LinkLayer(buffer, linkLayerParameters, transceiver, DebugLog);
             linkLayer.LinkLayerMode = mode;

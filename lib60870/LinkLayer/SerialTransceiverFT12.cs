@@ -34,7 +34,14 @@ namespace lib60870.linklayer
     internal class SerialTransceiverFT12
     {
 
-        private Stream serialStream = null;
+        private Stream serialStream {
+            get {
+                if (port == null)
+                    return _serialStream;
+                  else
+                    return port.BaseStream;
+            } }
+        private Stream _serialStream = null;
         private SerialPort port = null;
 
         private Action<string> DebugLog;
@@ -48,18 +55,18 @@ namespace lib60870.linklayer
         // timeout to wait for next character in a message
         private int characterTimeout = 50;
 
-        public SerialTransceiverFT12(SerialPort port, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
+        public SerialTransceiverFT12(ref SerialPort port, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
         {
             this.port = port;
-            this.serialStream = port.BaseStream;
+            this._serialStream = this.port.BaseStream;
             this.DebugLog = debugLog;
             this.linkLayerParameters = linkLayerParameters;
         }
 
-        public SerialTransceiverFT12(Stream serialStream, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
+        public SerialTransceiverFT12(ref Stream serialStream, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
         {
             this.port = null;
-            this.serialStream = serialStream;
+            this._serialStream = serialStream;
             this.DebugLog = debugLog;
             this.linkLayerParameters = linkLayerParameters;
         }
