@@ -776,6 +776,7 @@ namespace lib60870.linklayer
 
         public void Run()
         {
+            buffer.Initialize();
             transceiver.ReadNextMessage(buffer, HandleMessageAction);
 
             if (linkLayerMode == LinkLayerMode.BALANCED)
