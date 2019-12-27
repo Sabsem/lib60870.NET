@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016-2018 MZ Automation GmbH
+ *  Copyright 2016-2019 MZ Automation GmbH
  *
  *  This file is part of lib60870.NET
  *
@@ -525,6 +525,8 @@ namespace lib60870.CS104
 
         internal int? fileTimeout = null;
 
+        private int receiveTimeoutInMs = 1000; /* maximum allowed time between SOF byte and last message byte */
+
         private List<RedundancyGroup> redGroups = new List<RedundancyGroup>();
 
         private ServerMode serverMode = ServerMode.SINGLE_REDUNDANCY_GROUP;
@@ -700,6 +702,22 @@ namespace lib60870.CS104
             }
         }
 
+        /// <summary>
+        /// Maximum allowed time for receiving a single message
+        /// </summary>
+        public int ReceiveTimeout
+        {
+            get
+            {
+                return this.receiveTimeoutInMs;
+            }
+            set
+            {
+                this.receiveTimeoutInMs = value;
+            }
+        }
+
+
         private void ServerAcceptThread()
         {
             running = true;
@@ -833,7 +851,7 @@ namespace lib60870.CS104
         }
 
         /// <summary>
-        /// Sets the local TCP port to bind to. Default is 2404.
+        /// Sets the local TCP port to bind to. Default is 2404, or 19998 when using TLS.
         /// </summary>
         /// <param name="tcpPort">Local TCP port to bind.</param>
         public void SetLocalPort(int tcpPort)
