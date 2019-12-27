@@ -1,5 +1,5 @@
 ﻿/*
- *  Copyright 2016-2018 MZ Automation GmbH
+ *  Copyright 2016-2019 MZ Automation GmbH
  *
  *  This file is part of lib60870.NET
  *
@@ -22,6 +22,8 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
+using System.Security.Authentication;
+using System.Net.Security;
 
 namespace lib60870.CS104
 {
@@ -39,6 +41,10 @@ namespace lib60870.CS104
         private bool chainValidation = true;
 
         private bool allowOnlySpecificCertificates = false;
+
+        private SslProtocols sslVersion = SslProtocols.None;
+
+        private RemoteCertificateValidationCallback certificateValidationCallback;
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="lib60870.TlsSecurityInformation"/> performs a X509 chain validation
@@ -141,6 +147,36 @@ namespace lib60870.CS104
         {
             caCertificates.Add(caCertificate);
         }
+
+        public SslProtocols TlsVersion
+        {
+            get
+            {
+                return sslVersion;
+            }
+            set
+            {
+                sslVersion = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the certificate validation callback.
+        /// </summary>
+        /// <value>The certificate validation callback, or null to use the library internal certificate validation callbacks</value>
+        public RemoteCertificateValidationCallback CertificateValidationCallback 
+        {
+            get 
+            {
+                return certificateValidationCallback;
+            }
+            set 
+            {
+                certificateValidationCallback = value;
+            }
+        }
+
+
     }
 }
 

@@ -1,7 +1,7 @@
 /*
  *  Connection.cs
  *
- *  Copyright 2016, 2017 MZ Automation GmbH
+ *  Copyright 2016-2019 MZ Automation GmbH
  *
  *  This file is part of lib60870.NET
  *
@@ -363,7 +363,7 @@ namespace lib60870.CS104
         }
 
         private int connectTimeoutInMs = 1000;
-
+        private int receiveTimeoutInMs = 1000; /* maximum allowed time between SOF byte and last message byte */
 
         public ApplicationLayerParameters Parameters
         {
@@ -740,15 +740,38 @@ namespace lib60870.CS104
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="lib60870.CS104.Connection"/> class using TLS.
+        /// </summary>
+        /// <param name="hostname">hostname of IP address of the CS 104 server</param>
+        /// <param name="tlsInfo">TLS setup</param>
+        /// <param name="tcpPort">TCP port of the CS 104 server</param>
+        public Connection(string hostname, TlsSecurityInformation tlsInfo, int tcpPort = 19998)
+        {
+            Setup(hostname, new APCIParameters(), new ApplicationLayerParameters(), tcpPort);
+            tlsSecInfo = tlsInfo;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="lib60870.CS104.Connection"/> class using TLS.
+        /// </summary>
+        /// <param name="hostname">hostname of IP address of the CS 104 server</param>
+        /// <param name="tcpPort">TCP port of the CS 104 server</param>
+        /// <param name="apciParameters">APCI parameters.</param>
+        /// <param name="alParameters">application layer parameters.</param>
+        /// <param name="tlsInfo">TLS setup</param>
+        public Connection(string hostname, int tcpPort, APCIParameters apciParameters, ApplicationLayerParameters alParameters, TlsSecurityInformation tlsInfo)
+        {
+            Setup(hostname, apciParameters.Clone(), alParameters.Clone(), tcpPort);
+            tlsSecInfo = tlsInfo;
+        }
+
+        /// <summary>
         /// Set the security parameters for TLS
         /// </summary>
         /// <param name="securityInfo">Security info.</param>
         public void SetTlsSecurity(TlsSecurityInformation securityInfo)
         {
             tlsSecInfo = securityInfo;
-
-            if (securityInfo != null)
-                this.tcpPort = 19998;
         }
 
         /// <summary>
@@ -767,6 +790,36 @@ namespace lib60870.CS104
         public void SetConnectTimeout(int millies)
         {
             this.connectTimeoutInMs = millies;
+        }
+
+        /// <summary>
+        /// Timeout for connection establishment in milliseconds (ms)
+        /// </summary>
+        public int ConnectTimeout
+        {
+            get
+            {
+                return this.connectTimeoutInMs;
+            }
+            set
+            {
+                this.connectTimeoutInMs = value;
+            }
+        }
+
+        /// <summary>
+        /// Maximum allowed time for receiving a single message
+        /// </summary>
+        public int ReceiveTimeout
+        {
+            get
+            {
+                return this.receiveTimeoutInMs;
+            }
+            set
+            {
+                this.receiveTimeoutInMs = value;
+            }
         }
 
         /// <summary>
@@ -1131,7 +1184,6 @@ namespace lib60870.CS104
 
             ConnectAsync();
 
-
             while ((running == false) && (socketError == false))
             {
                 Thread.Sleep(1);
@@ -1173,43 +1225,80 @@ namespace lib60870.CS104
             }
         }
 
+        private int readState = 0; /* 0 - idle, 1 - start received, 2 - reading remaining bytes */
+        private int currentReadPos = 0;
+        private int currentReadMsgLength = 0;
+        private int remainingReadLength = 0;
+        private long currentReadTimeout = 0;
+
         private int receiveMessage(byte[] buffer)
         {
-            int readLength = 0;
-
-            //if (netStream.DataAvailable) {
+            /* check receive timeout */
+            if (readState != 0)
+            {
+                if (SystemUtils.currentTimeMillis() > currentReadTimeout)
+                {
+                    DebugLog("Receive timeout!");
+                    return -1;
+                }
+            }
 
             if (socket.Poll(50, SelectMode.SelectRead))
             {
-                // wait for first byte
-                if (netStream.Read(buffer, 0, 1) != 1)
-                    return -1;
 
-                if (buffer[0] != 0x68)
+                if (readState == 0)
                 {
-                    DebugLog("Missing SOF indicator!");
+                    // wait for start byte
+                    if (netStream.Read(buffer, 0, 1) != 1)
+                        return -1;
 
-                    return -1;
+                    if (buffer[0] != 0x68)
+                    {
+                        DebugLog("Missing SOF indicator!");
+
+                        return -1;
+                    }
+
+                    readState = 1;
                 }
 
-                // read length byte
-                if (netStream.Read(buffer, 1, 1) != 1)
-                    return -1;
-
-                int length = buffer[1];
-
-                // read remaining frame
-                if (netStream.Read(buffer, 2, length) != length)
+                if (readState == 1)
                 {
-                    DebugLog("Failed to read complete frame!");
+                    // read length byte
+                    if (netStream.Read(buffer, 1, 1) != 1)
+                        return 0;
 
-                    return -1;
+                    currentReadMsgLength = buffer[1];
+                    remainingReadLength = currentReadMsgLength;
+                    currentReadPos = 2;
+
+                    readState = 2;
                 }
 
-                readLength = length + 2;
+                if (readState == 2)
+                {
+                    int readLength = netStream.Read(buffer, currentReadPos, remainingReadLength);
+
+                    if (readLength == remainingReadLength)
+                    {
+                        readState = 0;
+                        currentReadTimeout = 0;
+                        return 2 + currentReadMsgLength;
+                    }
+                    else
+                    {
+                        currentReadPos += readLength;
+                        remainingReadLength = remainingReadLength - readLength;
+                    }
+                }
+
+                if (currentReadTimeout == 0)
+                {
+                    currentReadTimeout = SystemUtils.currentTimeMillis() + this.receiveTimeoutInMs;
+                }
             }
 
-            return readLength;
+            return 0;
         }
 
         private bool checkConfirmTimeout(long currentTime)
@@ -1363,7 +1452,6 @@ namespace lib60870.CS104
             {
                 byte[] tmp = new byte[1];
 
-
                 socket.Send(tmp, 0, 0);
 
                 return true;
@@ -1516,7 +1604,7 @@ namespace lib60870.CS104
                 return false;
         }
 
-        private bool CertificateValidation(Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        private bool CertificateValidationCallback (Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (certificate != null)
             {
@@ -1591,7 +1679,12 @@ namespace lib60870.CS104
 
                             DebugLog("Setup TLS");
 
-                            SslStream sslStream = new SslStream(netStream, true, CertificateValidation, LocalCertificateSelectionCallback);
+                            RemoteCertificateValidationCallback validationCallback = CertificateValidationCallback;
+
+                            if (tlsSecInfo.CertificateValidationCallback != null)
+                                validationCallback = tlsSecInfo.CertificateValidationCallback;
+
+                            SslStream sslStream = new SslStream(netStream, true, validationCallback, LocalCertificateSelectionCallback);
 
                             var clientCertificateCollection = new X509Certificate2Collection(tlsSecInfo.OwnCertificate);
 
@@ -1602,14 +1695,17 @@ namespace lib60870.CS104
                                 if (targetHostName == null)
                                     targetHostName = "*";
 
-                                sslStream.AuthenticateAsClient(targetHostName, clientCertificateCollection, System.Security.Authentication.SslProtocols.Tls, false);
+                                System.Security.Authentication.SslProtocols tlsVersion = System.Security.Authentication.SslProtocols.None;
+
+                                if (tlsSecInfo != null)
+                                    tlsVersion = tlsSecInfo.TlsVersion;
+
+                                DebugLog("Using TLS version: " + tlsVersion.ToString());
+
+                                sslStream.AuthenticateAsClient(targetHostName, clientCertificateCollection, tlsVersion, false);
                             }
                             catch (IOException e)
                             {
-
-                                Console.WriteLine(e.ToString());
-                                Console.WriteLine(e.StackTrace);
-
                                 string message;
 
                                 if (e.GetBaseException() != null)
@@ -1622,6 +1718,12 @@ namespace lib60870.CS104
                                 }
 
                                 DebugLog("TLS authentication error: " + message);
+
+                                throw new SocketException(10060);
+                            }
+                            catch (System.Security.Authentication.AuthenticationException ex)
+                            {
+                                DebugLog("TLS authentication exception during connection setup: " + ex.Message);
 
                                 throw new SocketException(10060);
                             }
@@ -1727,6 +1829,9 @@ namespace lib60870.CS104
                                 if (isConnected() == false)
                                     loopRunning = false;
 
+                                if (running == false)
+                                    loopRunning = false;
+
                                 if (useSendMessageQueue)
                                 {
                                     if (SendNextWaitingASDU() == true)
@@ -1764,6 +1869,7 @@ namespace lib60870.CS104
                         }
 
                         running = false;
+                        socketError = true;
 
                         socket.Close();
 
