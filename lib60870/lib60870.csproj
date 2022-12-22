@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<<<<<<< HEAD
   <Import Project="..\..\..\..\..\AutomationCalib\AutoCalib\Libs\Libs\ProtocolLibrary\packages\NUnit.3.12.0\build\NUnit.props" Condition="Exists('..\..\..\..\..\AutomationCalib\AutoCalib\Libs\Libs\ProtocolLibrary\packages\NUnit.3.12.0\build\NUnit.props')" />
+=======
+  <Import Project="..\..\..\..\..\packages\NUnit.3.13.3\build\NUnit.props" Condition="Exists('..\..\..\..\..\packages\NUnit.3.13.3\build\NUnit.props')" />
+>>>>>>> 201d669a1e072626a82272050921a3bcafb15cb2
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -37,10 +41,37 @@
     <Prefer32Bit>false</Prefer32Bit>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>embedded</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Reference Include="nunit.framework, Version=3.12.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\..\AutomationCalib\AutoCalib\Libs\Libs\ProtocolLibrary\packages\NUnit.3.12.0\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
+=======
+    <Reference Include="nunit.framework, Version=3.13.3.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\packages\NUnit.3.13.3\lib\net45\nunit.framework.dll</HintPath>
+>>>>>>> 201d669a1e072626a82272050921a3bcafb15cb2
     </Reference>
     <Reference Include="System" />
   </ItemGroup>
@@ -118,6 +149,10 @@
       <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\..\..\..\packages\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\packages\NUnit.3.12.0\build\NUnit.props'))" />
+<<<<<<< HEAD
     <Error Condition="!Exists('..\..\..\..\..\AutomationCalib\AutoCalib\Libs\Libs\ProtocolLibrary\packages\NUnit.3.12.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\AutomationCalib\AutoCalib\Libs\Libs\ProtocolLibrary\packages\NUnit.3.12.0\build\NUnit.props'))" />
+=======
+    <Error Condition="!Exists('..\..\..\..\..\packages\NUnit.3.13.3\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\packages\NUnit.3.13.3\build\NUnit.props'))" />
+>>>>>>> 201d669a1e072626a82272050921a3bcafb15cb2
   </Target>
 </Project>
