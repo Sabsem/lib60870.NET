@@ -228,16 +228,24 @@ namespace lib60870.linklayer
             return 0;
         }
 
+        private int ownAddress = 0;
+
 
         public int OwnAddress
         {
             get
             {
-                return secondaryLinkLayer.Address;
+                if (secondaryLinkLayer is SecondaryLinkLayerUnbalanced)
+                    return secondaryLinkLayer.Address;
+                else
+                    return ownAddress;
             }
             set
             {
-                secondaryLinkLayer.Address = value;
+                if (secondaryLinkLayer is SecondaryLinkLayerUnbalanced)
+                    secondaryLinkLayer.Address = value;
+                else
+                    ownAddress = value;
             }
         }
 
@@ -776,8 +784,14 @@ namespace lib60870.linklayer
 
         public void Run()
         {
-            buffer.Initialize();
-            transceiver.ReadNextMessage(buffer, HandleMessageAction);
+            try
+            {
+                transceiver.ReadNextMessage(buffer, HandleMessageAction);
+            }
+            catch (InvalidOperationException)
+            {
+                //TODO exception handling code       
+            }
 
             if (linkLayerMode == LinkLayerMode.BALANCED)
             {
@@ -793,6 +807,11 @@ namespace lib60870.linklayer
             }
 
         }
+
+       public void AddPortDeniedHandler (EventHandler eventHandler)
+       {
+            transceiver.AddPortDeniedHandler(eventHandler);
+       }
     }
 }
 

@@ -34,14 +34,7 @@ namespace lib60870.linklayer
     internal class SerialTransceiverFT12
     {
 
-        private Stream serialStream {
-            get {
-                if (port == null)
-                    return _serialStream;
-                  else
-                    return port.BaseStream;
-            } }
-        private Stream _serialStream = null;
+        private Stream serialStream = null;
         private SerialPort port = null;
 
         private Action<string> DebugLog;
@@ -55,18 +48,20 @@ namespace lib60870.linklayer
         // timeout to wait for next character in a message
         private int characterTimeout = 50;
 
-        public SerialTransceiverFT12(ref SerialPort port, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
+        private bool fatalError = false;
+
+        public SerialTransceiverFT12(SerialPort port, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
         {
             this.port = port;
-            this._serialStream = this.port.BaseStream;
+            this.serialStream = port.BaseStream;
             this.DebugLog = debugLog;
             this.linkLayerParameters = linkLayerParameters;
         }
 
-        public SerialTransceiverFT12(ref Stream serialStream, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
+        public SerialTransceiverFT12(Stream serialStream, LinkLayerParameters linkLayerParameters, Action<string> debugLog)
         {
             this.port = null;
-            this._serialStream = serialStream;
+            this.serialStream = serialStream;
             this.DebugLog = debugLog;
             this.linkLayerParameters = linkLayerParameters;
         }
@@ -103,8 +98,16 @@ namespace lib60870.linklayer
         {
             DebugLog("SEND " + BitConverter.ToString(msg, 0, msgSize));
 
-            serialStream.Write(msg, 0, msgSize);
-            serialStream.Flush();
+            try
+            {
+                serialStream.Write(msg, 0, msgSize);
+                serialStream.Flush();
+            }
+            catch(UnauthorizedAccessException)
+            {
+
+            }
+            
         }
 
         // read the next block of the message
@@ -113,10 +116,9 @@ namespace lib60870.linklayer
             int readByte;
             int readBytes = 0;
 
-            serialStream.ReadTimeout = timeout * count;
-
             try
             {
+                serialStream.ReadTimeout = timeout * count;
 
                 while ((readByte = serialStream.ReadByte()) != -1)
                 {
@@ -131,8 +133,29 @@ namespace lib60870.linklayer
             catch (TimeoutException)
             {
             }
+            catch(IOException ex)
+            {
+                DebugLog("READ: IOException - " + ex.Message);	
+            }
+            catch (UnauthorizedAccessException)
+            {
+                if (fatalError == false)
+                {
+                    if (accessDenied != null)
+                        accessDenied(this, EventArgs.Empty);
+
+                    fatalError = true;
+                }
+            }
 
             return readBytes;
+        }
+
+        private event EventHandler accessDenied = null;
+
+        public void AddPortDeniedHandler (EventHandler eventHandler)
+        {
+            accessDenied += eventHandler;
         }
 
         public void ReadNextMessage(byte[] buffer, Action<byte[], int> messageHandler)

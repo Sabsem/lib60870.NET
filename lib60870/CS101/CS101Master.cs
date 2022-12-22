@@ -40,6 +40,8 @@ namespace lib60870.CS101
         protected SerialPort port = null;
         protected bool running = false;
 
+        private bool fatalError = false;
+
         private void ReceiveMessageLoop()
         {
             running = true;
@@ -74,18 +76,24 @@ namespace lib60870.CS101
         /// </summary>
         public void Run()
         {
-            if (port != null)
+            if(fatalError == false)
             {
-                if (port.IsOpen == false)
-                    port.Open();
+                linkLayer.Run();
 
-                port.DiscardInBuffer();
+                if (fileClient != null)
+                    fileClient.HandleFileService();
             }
+                        
+        }
 
-            linkLayer.Run();
+        private void fatalErrorHandler(object sender, EventArgs eventArgs)
+        {
+            fatalError = true;
+        }
 
-            if (fileClient != null)
-                fileClient.HandleFileService();
+        public void AddPortDeniedHandler(EventHandler eventHandler)
+        {
+            linkLayer.AddPortDeniedHandler(eventHandler);
         }
 
         /// <summary>
@@ -93,6 +101,8 @@ namespace lib60870.CS101
         /// </summary>
         public void Start()
         {
+            linkLayer.AddPortDeniedHandler(fatalErrorHandler);
+            
             if (port != null)
             {
                 if (port.IsOpen == false)
@@ -117,12 +127,6 @@ namespace lib60870.CS101
 
                 if (workerThread != null)
                     workerThread.Join();
-
-                if (port != null)
-                {
-                    if (port.IsOpen == true)
-                        port.Close();
-                }
             }
         }
 
@@ -158,6 +162,8 @@ namespace lib60870.CS101
 
         private PrimaryLinkLayerUnbalanced linkLayerUnbalanced = null;
         private PrimaryLinkLayerBalanced primaryLinkLayer = null;
+
+        private SecondaryLinkLayer secondaryLinkLayer = null;
 
         private SerialTransceiverFT12 transceiver;
 
@@ -198,7 +204,7 @@ namespace lib60870.CS101
                 this.appLayerParameters = alParams;
 
 
-            this.transceiver = new SerialTransceiverFT12(ref port, linkLayerParameters, DebugLog);
+            this.transceiver = new SerialTransceiverFT12(port, linkLayerParameters, DebugLog);
 
             linkLayer = new LinkLayer(buffer, linkLayerParameters, transceiver, DebugLog);
             linkLayer.LinkLayerMode = mode;
@@ -210,7 +216,8 @@ namespace lib60870.CS101
                 primaryLinkLayer = new PrimaryLinkLayerBalanced(linkLayer, GetUserData, DebugLog);
 
                 linkLayer.SetPrimaryLinkLayer(primaryLinkLayer);
-                linkLayer.SetSecondaryLinkLayer(new SecondaryLinkLayerBalanced(linkLayer, 0, HandleApplicationLayer, DebugLog));
+                secondaryLinkLayer = new SecondaryLinkLayerBalanced (linkLayer, 0, HandleApplicationLayer, DebugLog);
+                linkLayer.SetSecondaryLinkLayer(secondaryLinkLayer);
 
                 userDataQueue = new Queue<BufferFrame>();
             }
@@ -238,7 +245,7 @@ namespace lib60870.CS101
                 this.appLayerParameters = alParams;
 
 
-            this.transceiver = new SerialTransceiverFT12(ref serialStream, linkLayerParameters, DebugLog);
+            this.transceiver = new SerialTransceiverFT12(serialStream, linkLayerParameters, DebugLog);
 
             linkLayer = new LinkLayer(buffer, linkLayerParameters, transceiver, DebugLog);
             linkLayer.LinkLayerMode = mode;
@@ -310,6 +317,9 @@ namespace lib60870.CS101
             set
             {
                 UseSlaveAddress(value);
+
+                if (secondaryLinkLayer != null)
+                    secondaryLinkLayer.Address = slaveAddress;
             }
 
             get
@@ -329,8 +339,8 @@ namespace lib60870.CS101
         {
             if (primaryLinkLayer != null)
                 primaryLinkLayer.LinkLayerAddressOtherStation = slaveAddress;
-            else
-                this.slaveAddress = slaveAddress;
+
+            this.slaveAddress = slaveAddress;
         }
 
         void IPrimaryLinkLayerCallbacks.AccessDemand(int slaveAddress)

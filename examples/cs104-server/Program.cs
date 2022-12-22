@@ -1,3 +1,5 @@
+// This example shows how to send periodic messages and handle commands from clients
+
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -87,6 +89,15 @@ namespace cs104_server
 
 				SingleCommand sc = (SingleCommand)asdu.GetElement (0);
 
+				if (sc.Select)
+				{
+					Console.WriteLine("  received select");
+				}
+				else
+				{
+					Console.WriteLine("  received execute");
+				}
+
 				Console.WriteLine (sc.ToString ());
 
                 connection.SendACT_CON(asdu, false);
@@ -111,7 +122,22 @@ namespace cs104_server
 				running = false;
 			};
 
-			Server server = new Server ();
+            // specify application layer parameters (CS 101 and CS 104)
+            var alParams = new ApplicationLayerParameters();
+            alParams.SizeOfCA = 2;
+            alParams.SizeOfIOA = 3;
+            alParams.MaxAsduLength = 249;
+
+            // specify APCI parameters (only CS 104)
+            var apciParameters = new APCIParameters();
+            apciParameters.K = 12;
+            apciParameters.W = 8;
+            apciParameters.T0 = 10;
+            apciParameters.T1 = 15;
+            apciParameters.T2 = 10;
+            apciParameters.T3 = 20;
+
+            Server server = new Server (apciParameters, alParams);
 
 			server.DebugOutput = true;
 

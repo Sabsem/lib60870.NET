@@ -284,6 +284,52 @@ namespace tests
             server.Stop ();
         }
 
+        [Test()]
+        //[Ignore("Ignore to save execution time")]
+        public void TestSendIMessageAfterStopDT()
+        {
+            ApplicationLayerParameters parameters = new ApplicationLayerParameters();
+            APCIParameters apciParameters = new APCIParameters();
+
+            Server server = new Server(apciParameters, parameters);
+
+            server.SetLocalPort(20213);
+
+            server.Start();
+
+            Connection connection = new Connection("127.0.0.1", 20213, apciParameters, parameters);
+
+            ConnectionException se = null;
+
+            try
+            {
+                connection.Connect();
+
+                connection.SendStartDT();
+
+                Thread.Sleep(200);
+
+                connection.SendStopDT();
+
+                // send command (should trigger server disconnect)
+                connection.SendControlCommand(CauseOfTransmission.ACTIVATION, 1, new SingleCommand(5000, true, false, 0));
+
+                Thread.Sleep(500);
+
+                // send command (should throw exception - not connected)
+                connection.SendControlCommand(CauseOfTransmission.ACTIVATION, 1, new SingleCommand(5000, true, false, 0));
+            }
+            catch (ConnectionException ex)
+            {
+                se = ex;
+            }
+
+            Assert.IsNotNull(se);
+            Assert.AreEqual(se.Message, "not connected");
+            Assert.AreEqual(10057, ((SocketException)se.InnerException).ErrorCode);
+
+            server.Stop();
+        }
 
         [Test ()]
         //[Ignore("Ignore to save execution time")]
@@ -342,26 +388,28 @@ namespace tests
 
             Connection connection = new Connection("127.0.0.1", 20213, apciParameters, parameters);
 
-            for (int i = 0; i < 200; i++)
+            for (int i = 0; i < 3; i++)
             {
-                SocketException se = null;
+                ConnectionException se = null;
+
+                connection.Connect();
+
+                server.Stop();
+
+                Thread.Sleep(1000);
 
                 try
                 {
-                    connection.Connect();
-
-                    server.Stop();
-
                     connection.SendStartDT();
 
                     connection.Close();
                 }
-                catch (SocketException ex)
+                catch (ConnectionException ex)
                 {
                     se = ex;
                 }
 
-                Assert.IsNull(se);
+                Assert.IsNotNull(se);
 
                 server.Start();
             }
@@ -369,8 +417,6 @@ namespace tests
             server.Stop();
 
             connection.Close();
-
-   
         }
 
         [Test ()]
