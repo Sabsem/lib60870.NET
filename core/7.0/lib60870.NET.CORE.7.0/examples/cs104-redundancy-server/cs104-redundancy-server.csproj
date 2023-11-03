@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <RootNamespace>cs104_redundancy_server</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <Compile Include="..\..\..\..\..\examples\cs104-redundancy-server\Program.cs" Link="Program.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\lib60870.NET.CORE.7.0\lib60870.NET.CORE.7.0.csproj" />
+  </ItemGroup>
+
+</Project>

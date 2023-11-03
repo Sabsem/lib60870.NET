@@ -376,7 +376,7 @@ namespace lib60870
                 if (linkLayerParameters == null)
                     linkLayerParameters = new LinkLayerParameters();
 
-                transceiver = new SerialTransceiverFT12(ref port, linkLayerParameters, DebugLog);
+                transceiver = new SerialTransceiverFT12(port, linkLayerParameters, DebugLog);
 
                 initialized = false;
 
@@ -395,7 +395,7 @@ namespace lib60870
                 if (linkLayerParameters == null)
                     linkLayerParameters = new LinkLayerParameters();
 
-                transceiver = new SerialTransceiverFT12(ref serialStream, linkLayerParameters, DebugLog);
+                transceiver = new SerialTransceiverFT12(serialStream, linkLayerParameters, DebugLog);
 
                 initialized = false;
 
