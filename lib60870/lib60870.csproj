@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\..\..\..\..\..\..\svd\.nuget\NUnit.4.3.2\build\NUnit.props" Condition="Exists('..\..\..\..\..\..\..\..\svd\.nuget\NUnit.4.3.2\build\NUnit.props')" />
   <Import Project="..\..\..\..\..\packages\NUnit.4.2.1\build\NUnit.props" Condition="Exists('..\..\..\..\..\packages\NUnit.4.2.1\build\NUnit.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -136,5 +137,6 @@
       <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\..\..\..\packages\NUnit.4.2.1\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\packages\NUnit.4.2.1\build\NUnit.props'))" />
+    <Error Condition="!Exists('..\..\..\..\..\..\..\..\svd\.nuget\NUnit.4.3.2\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\..\..\svd\.nuget\NUnit.4.3.2\build\NUnit.props'))" />
   </Target>
 </Project>
