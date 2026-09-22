@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\..\..\..\..\packages\NUnit.3.13.3\build\NUnit.props" Condition="Exists('..\..\..\..\..\packages\NUnit.3.13.3\build\NUnit.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{F604286A-1AFC-4355-8C2C-A998CFCEE979}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>lib60870</RootNamespace>
+    <AssemblyName>lib60870</AssemblyName>
+    <ReleaseVersion>2.2.0</ReleaseVersion>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>embedded</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Externalconsole>true</Externalconsole>
+    <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>embedded</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>7.3</LangVersion>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\lib60870\Properties\AssemblyInfo.cs" />
+    <Compile Include="..\lib60870\CP56Time2a.cs" />
+    <Compile Include="..\lib60870\SystemUtils.cs" />
+    <Compile Include="..\lib60870\CP24Time2a.cs" />
+    <Compile Include="..\lib60870\CP16Time2a.cs" />
+    <Compile Include="..\lib60870\Frame.cs" />
+    <Compile Include="..\lib60870\LibraryCommon.cs" />
+    <Compile Include="..\lib60870\CP32Time2a.cs" />
+    <Compile Include="..\lib60870\ASDUParsingException.cs" />
+    <Compile Include="..\lib60870\CS101\ApplicationLayerParameters.cs" />
+    <Compile Include="..\lib60870\CS101\Bitstring32.cs" />
+    <Compile Include="..\lib60870\CS101\ASDU.cs" />
+    <Compile Include="..\lib60870\CS101\BinaryCounterReading.cs" />
+    <Compile Include="..\lib60870\CS101\CauseOfTransmission.cs" />
+    <Compile Include="..\lib60870\CS101\DoublePointInformation.cs" />
+    <Compile Include="..\lib60870\CS101\EndOfInitialization.cs" />
+    <Compile Include="..\lib60870\CS101\EventOfProtectionEquipment.cs" />
+    <Compile Include="..\lib60870\CS101\InformationObject.cs" />
+    <Compile Include="..\lib60870\CS101\IntegratedTotals.cs" />
+    <Compile Include="..\lib60870\CS101\MeasuredValueNormalized.cs" />
+    <Compile Include="..\lib60870\CS101\MeasuredValueScaled.cs" />
+    <Compile Include="..\lib60870\CS101\MeasuredValueShort.cs" />
+    <Compile Include="..\lib60870\CS101\OutputCircuitInfo.cs" />
+    <Compile Include="..\lib60870\CS101\PackedOutputCircuitInfo.cs" />
+    <Compile Include="..\lib60870\CS101\PackedStartEventsOfProtectionEquipment.cs" />
+    <Compile Include="..\lib60870\CS101\ParameterMeasuredValues.cs" />
+    <Compile Include="..\lib60870\CS101\QualityDescriptor.cs" />
+    <Compile Include="..\lib60870\CS101\QualityDescriptorP.cs" />
+    <Compile Include="..\lib60870\CS101\ScaledValue.cs" />
+    <Compile Include="..\lib60870\CS101\SetpointCommandQualifier.cs" />
+    <Compile Include="..\lib60870\CS101\SetpointCommands.cs" />
+    <Compile Include="..\lib60870\CS101\SingleCommand.cs" />
+    <Compile Include="..\lib60870\CS101\SingleCommandQualifier.cs" />
+    <Compile Include="..\lib60870\CS101\SingleEvent.cs" />
+    <Compile Include="..\lib60870\CS101\SinglePointInformation.cs" />
+    <Compile Include="..\lib60870\CS101\StartEvent.cs" />
+    <Compile Include="..\lib60870\CS101\StatusAndStatusChangeDetection.cs" />
+    <Compile Include="..\lib60870\CS101\StepPositionInformation.cs" />
+    <Compile Include="..\lib60870\CS101\SystemInformationCommands.cs" />
+    <Compile Include="..\lib60870\CS101\TypeID.cs" />
+    <Compile Include="..\lib60870\CS104\APCIParameters.cs" />
+    <Compile Include="..\lib60870\CS104\Connection.cs" />
+    <Compile Include="..\lib60870\CS104\Server.cs" />
+    <Compile Include="..\lib60870\CS104\TlsSecurityInformation.cs" />
+    <Compile Include="..\lib60870\CS101\Slave.cs" />
+    <Compile Include="..\lib60870\LinkLayer\LinkLayer.cs" />
+    <Compile Include="..\lib60870\LinkLayer\PrimaryLinkLayer.cs" />
+    <Compile Include="..\lib60870\LinkLayer\SecondaryLinkLayer.cs" />
+    <Compile Include="..\lib60870\LinkLayer\SerialTransceiverFT12.cs" />
+    <Compile Include="..\lib60870\ConnectionException.cs" />
+    <Compile Include="..\lib60870\BufferFrame.cs" />
+    <Compile Include="..\lib60870\CS101\CS101Slave.cs" />
+    <Compile Include="..\lib60870\CS101\Master.cs" />
+    <Compile Include="..\lib60870\LinkLayer\PrimaryLinkLayerBalanced.cs" />
+    <Compile Include="..\lib60870\LinkLayer\PrimaryLinkLayerUnbalanced.cs" />
+    <Compile Include="..\lib60870\LinkLayer\SecondaryLinkLayerBalanced.cs" />
+    <Compile Include="..\lib60870\LinkLayer\SecondaryLinkLayerUnbalanced.cs" />
+    <Compile Include="..\lib60870\CS101\FileObjects.cs" />
+    <Compile Include="..\lib60870\CS101\FileServices.cs" />
+    <Compile Include="..\lib60870\CS101\CS101Master.cs" />
+    <Compile Include="..\lib60870\LinkLayer\TcpServerVirtualSerialPort.cs" />
+    <Compile Include="..\lib60870\LinkLayer\TcpClientVirtualSerialPort.cs" />
+    <Compile Include="..\lib60870\CS104\ClientConnection.cs" />
+    <Compile Include="..\lib60870\ASDUQueue.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Numerics" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>
